@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:util="http://www.springframework.org/schema/util" xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+	http://www.springframework.org/schema/context  http://www.springframework.org/schema/context/spring-context-3.0.xsd http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+    <context:annotation-config/>
+    <!-- 注解向 Spring 容器注册 -->
+    <import resource="classpath*:homall-dao-spring.xml"/>
+    <!--<util:properties id="utilSetting" location="classpath:util.properties"/>-->
+    <!--<context:component-scan base-package="com.tecent.weixin.service"/>-->
+    <context:component-scan base-package="com.smallfire"/>
+    <context:component-scan base-package="advice"/>
+    <!-- 事务管理器 -->
+    <bean id="transactionManager"
+          class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+    <!-- 配置事务拦截器 -->
+    <bean id="transactionInterceptor"
+          class="org.springframework.transaction.interceptor.TransactionInterceptor">
+        <property name="transactionManager" ref="transactionManager"/>
+        <!-- 配置事务属性 -->
+        <property name="transactionAttributes">
+            <props>
+                <prop key="*">PROPAGATION_REQUIRED</prop>
+            </props>
+        </property>
+    </bean>
+
+    <!-- 开启事务拦截器 -->
+    <bean class="org.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator">
+        <property name="beanNames">
+            <list>
+                <value>com.smallfire.service.*Service</value>
+                <value>com.smallfire.service.*ServiceImpl</value>
+            </list>
+        </property>
+        <property name="interceptorNames">
+            <list>
+                <value>transactionInterceptor</value>
+            </list>
+        </property>
+    </bean>
+
+    <!-- spring 消息国际化-->
+    <bean id="messageSource"
+          class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
+        <property name="basenames">
+            <list>
+                <value>META-INF.messages.exception.messages</value>
+                <value>META-INF.messages.validation.messages</value>
+            </list>
+        </property>
+    </bean>
+
+    <!-- 构建验证器 -->
+    <!--<bean id="validator"-->
+    <!--class="validation.LocalValidatorFactoryBean">-->
+    <!--<property name="validationMessageSource">-->
+    <!--<ref bean="messageSource"/>-->
+    <!--</property>-->
+    <!--</bean>-->
+
+    <!-- 业务代理执行管理器 -->
+    <!--<bean id="proxyProcessManager" class="proxy.impl.ProxyProcessManagerImpl">-->
+    <!--<property name="postProcessorList">-->
+    <!--<list>-->
+    <!--</list>-->
+    <!--</property>-->
+    <!--<property name="preProcessorList">-->
+    <!--<list>-->
+    <!--</list>-->
+    <!--</property>-->
+    <!--</bean>-->
+    <!-- 业务代理管理器 -->
+    <!--<bean class="proxy.ServiceAopAspect">-->
+    <!--<property name="processManager">-->
+    <!--<bean class="proxy.impl.BusinessProxyProcessManager">-->
+    <!--&lt;!&ndash; 表单验证前置处理器 &ndash;&gt;-->
+    <!--<property name="validator" ref="validator"/>-->
+    <!--<property name="delegate" ref="proxyProcessManager"/>-->
+    <!--</bean>-->
+    <!--</property>-->
+    <!--</bean>-->
+    <!-- 微信业务配置-->
+    <!--<bean-->
+    <!--id="wxMpConfigStorage"-->
+    <!--class="me.chanjar.weixin.mp.api.WxMpInMemoryConfigStorage">-->
+    <!--<property-->
+    <!--name="appId"-->
+    <!--value="wxc409abdf7a9e1707"/>-->
+    <!--<property name="aesKey"-->
+    <!--value="jO9lzcjXrkDgyt2r7b3DnMyXn0oY3rPsxpUjDigAqCZ"/>-->
+    <!--<property-->
+    <!--name="secret"-->
+    <!--value="57f8ebc3407fe48c4de385ccc0e43f2a"/>-->
+    <!--<property-->
+    <!--name="token"-->
+    <!--value="chenqidou"/>-->
+    <!--</bean>-->
+    <!--<bean-->
+    <!--id="wxMpServiceImpl"-->
+    <!--class="me.chanjar.weixin.mp.api.WxMpServiceImpl">-->
+    <!--<property-->
+    <!--name="wxMpConfigStorage"-->
+    <!--ref="wxMpConfigStorage"/>-->
+    <!--</bean>-->
+    <!--<bean id="wxMpMessageRouter" class=" me.chanjar.weixin.mp.api.WxMpMessageRouter">-->
+    <!--<constructor-arg ref="wxMpServiceImpl"/>-->
+    <!--</bean>-->
+
+    <!-- AOP自动代理 -->
+    <aop:aspectj-autoproxy/>
+</beans>
